@@ -1,0 +1,53 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: infra-monitor
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/monitor}
+    username: ${DB_USER:monitor}
+    password: ${DB_PASSWORD:monitor}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update   # fine for a demo; use Flyway/Liquibase migrations for production
+  # Email is enabled by setting SPRING_MAIL_HOST (and SPRING_MAIL_PORT/USERNAME/PASSWORD) as env vars.
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+monitor:
+  check-interval-ms: 30000
+  check-initial-delay-ms: 10000
+  retention-days: 14
+  stale-host-seconds: 60
+  security:
+    api-key: ${MONITOR_API_KEY:}
+  thresholds:
+    cpu: ${THRESHOLD_CPU:85}
+    memory: ${THRESHOLD_MEMORY:90}
+    disk: ${THRESHOLD_DISK:85}
+  notifications:
+    slack-webhook-url: ${SLACK_WEBHOOK_URL:}
+    email-to: ${ALERT_EMAIL_TO:}
+    email-from: ${ALERT_EMAIL_FROM:monitor@localhost}
+  remediation:
+    enabled: ${MONITOR_REMEDIATION_ENABLED:false}
+    scripts-dir: ${SCRIPTS_DIR:./scripts}
+    cooldown-seconds: 300
+  # Default checks for running the server directly on your machine.
+  checks:
+    - name: monitor-api
+      type: HTTP
+      url: http://localhost:8080/actuator/health
+    - name: database-tcp
+      type: TCP
+      host: localhost
+      port: 5432
+    - name: localhost-ping
+      type: PING
+      host: 127.0.0.1

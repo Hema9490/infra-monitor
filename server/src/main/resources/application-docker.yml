@@ -1,0 +1,15 @@
+# Active when SPRING_PROFILES_ACTIVE=docker (set in docker-compose.yml)
+monitor:
+  check-interval-ms: 10000
+  checks:
+    - name: demo-web
+      type: HTTP
+      url: http://demo-web:80
+      remediation: restart-service.sh demo-web   # only runs when MONITOR_REMEDIATION_ENABLED=true
+    - name: postgres
+      type: TCP
+      host: postgres
+      port: 5432
+    - name: monitor-api
+      type: HTTP
+      url: http://localhost:8080/actuator/health

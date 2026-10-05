@@ -1,0 +1,11 @@
+# Enables auto-remediation for the demo:
+#   docker compose -f docker-compose.yml -f docker-compose.remediation.yml up --build
+#
+# SECURITY: mounting docker.sock gives the server container control of the Docker daemon
+# (effectively root on the host). Use only on a throwaway demo machine.
+services:
+  server:
+    environment:
+      MONITOR_REMEDIATION_ENABLED: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
